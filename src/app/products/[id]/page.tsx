@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Truck, Shield, Recycle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/cart-context';
 
 // Mock product data - will be replaced with real data later
 const mockProducts = {
@@ -113,6 +114,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.id as string;
   const product = mockProducts[productId as keyof typeof mockProducts];
+  const { addItem } = useCart();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -141,14 +143,31 @@ export default function ProductDetailPage() {
       />
     ));
   };
-
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert('Please select a size');
+      alert('Selecteer eerst een maat');
       return;
     }
-    // Add to cart logic will be implemented later
-    alert(`Added ${quantity} x ${product.name} (${selectedSize}, ${product.colors[selectedColor].name}) to cart!`);
+
+    const selectedColorName = product.colors[selectedColor]?.name || '';
+    const selectedSizeName = selectedSize;
+
+    // Create unique ID for cart item based on product, color, and size
+    const cartItemId = `${product.id}-${selectedColorName}-${selectedSizeName}`;
+
+    addItem({
+      id: cartItemId,
+      productId: product.id.toString(),
+      variantId: `${selectedColorName}-${selectedSizeName}`,
+      name: product.name,
+      price: product.price,
+      image: product.images[0],
+      color: selectedColorName,
+      size: selectedSizeName,
+    });
+
+    // Show success message (you could replace this with a toast notification)
+    alert(`${product.name} (${selectedColorName}, ${selectedSizeName}) toegevoegd aan winkelwagen!`);
   };
 
   return (
