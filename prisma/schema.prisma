@@ -13,11 +13,14 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
+  firstName     String?
+  lastName      String?
   name          String?
   password      String?
   emailVerified DateTime?
   image         String?
   admin         Boolean   @default(false)
+  newsletter    Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
