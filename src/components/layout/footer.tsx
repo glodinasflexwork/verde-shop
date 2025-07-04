@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 
 export function Footer() {
@@ -33,7 +32,7 @@ export function Footer() {
 
   return (
     <footer className="bg-gray-50 border-t">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
@@ -83,7 +82,7 @@ export function Footer() {
         </div>
 
         {/* Newsletter Signup */}
-        <div className="mt-12 pt-8 border-t border-gray-200">
+        <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="max-w-md">
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">
               Nieuwsbrief
@@ -108,16 +107,19 @@ export function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
+        <div className="mt-6 pt-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-600">
             © 2024 Verde. Alle rechten voorbehouden.
           </p>
           <div className="mt-4 md:mt-0 flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <Image src="/icons/ideal.svg" alt="iDEAL" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/paypal.svg" alt="PayPal" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/visa.svg" alt="Visa" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/mastercard.svg" alt="Mastercard" width={24} height={24} className="h-6 w-auto" />
+            <div className="flex items-center space-x-3">
+              <span className="text-xs text-gray-500">Betaalmethoden:</span>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">iDEAL</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">PayPal</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Visa</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Mastercard</span>
+              </div>
             </div>
           </div>
         </div>
