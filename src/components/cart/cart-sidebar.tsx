@@ -24,14 +24,6 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   return (
     <>
-      {/* Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-20 z-40"
-          onClick={onClose}
-        />
-      )}
-
       {/* Sidebar */}
       <div className={`fixed right-0 top-0 h-full w-96 bg-white shadow-xl z-50 transform transition-transform duration-300 ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
