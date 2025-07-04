@@ -41,7 +41,7 @@ function ToastComponent({ toast }: ToastComponentProps) {
   };
 
   return (
-    <div className={`max-w-sm w-full ${getBackgroundColor()} border rounded-lg shadow-lg p-4 transform transition-all duration-300 ease-in-out`}>
+    <div className={`w-full ${getBackgroundColor()} border rounded-lg shadow-lg p-4 transform transition-all duration-300 ease-in-out`}>
       <div className="flex items-start">
         <div className="flex-shrink-0">
           {getIcon()}
@@ -74,7 +74,7 @@ export function ToastContainer() {
   const { toasts } = useToast();
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-4">
+    <div className="fixed top-4 right-4 z-50 space-y-4 w-80 max-w-[calc(100vw-2rem)]">
       {toasts.map((toast) => (
         <ToastComponent key={toast.id} toast={toast} />
       ))}
