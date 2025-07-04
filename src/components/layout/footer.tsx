@@ -7,8 +7,8 @@ export function Footer() {
       { name: 'Contact', href: '/contact' },
       { name: 'Veelgestelde Vragen', href: '/faq' },
       { name: 'Verzending & Retour', href: '/shipping' },
-      { name: 'Maattabel', href: '/size-guide' },
-      { name: 'Garantie', href: '/warranty' },
+      { name: 'Maattabel', href: '/maattabel' },
+      { name: 'Garantie', href: '/garantie' },
     ],
     'Over Verde': [
       { name: 'Ons Verhaal', href: '/about' },
