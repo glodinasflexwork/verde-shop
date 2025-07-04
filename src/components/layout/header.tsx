@@ -13,10 +13,10 @@ export function Header() {
   const { state } = useCart()
 
   const navigation = [
-    { name: 'Duurzame Mode', href: '/fashion' },
+    { name: 'Shop', href: '/products' },
+    { name: 'Duurzame Mode', href: '/categories/tops' },
     { name: 'Natuurlijke Schoonheid', href: '/beauty' },
     { name: 'Huis & Lifestyle', href: '/home' },
-    { name: 'Sport & Outdoor', href: '/sports' },
     { name: 'Sale', href: '/sale' },
   ]
 
