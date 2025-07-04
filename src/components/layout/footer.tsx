@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 
 export function Footer() {
@@ -113,10 +114,10 @@ export function Footer() {
           </p>
           <div className="mt-4 md:mt-0 flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-              <img src="/icons/ideal.svg" alt="iDEAL" className="h-6" />
-              <img src="/icons/paypal.svg" alt="PayPal" className="h-6" />
-              <img src="/icons/visa.svg" alt="Visa" className="h-6" />
-              <img src="/icons/mastercard.svg" alt="Mastercard" className="h-6" />
+              <Image src="/icons/ideal.svg" alt="iDEAL" width={24} height={24} className="h-6 w-auto" />
+              <Image src="/icons/paypal.svg" alt="PayPal" width={24} height={24} className="h-6 w-auto" />
+              <Image src="/icons/visa.svg" alt="Visa" width={24} height={24} className="h-6 w-auto" />
+              <Image src="/icons/mastercard.svg" alt="Mastercard" width={24} height={24} className="h-6 w-auto" />
             </div>
           </div>
         </div>
