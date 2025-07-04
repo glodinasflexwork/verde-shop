@@ -208,33 +208,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
-      <section className="py-16 bg-green-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Blijf op de hoogte van onze nieuwste collecties
-          </h2>
-          <p className="text-green-100 mb-8 text-lg">
-            Ontvang exclusieve aanbiedingen en tips voor een duurzame levensstijl
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Uw e-mailadres"
-              className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-green-300"
-              required
-            />
-            <Button 
-              type="submit" 
-              variant="secondary" 
-              size="lg"
-              className="bg-white text-green-600 hover:bg-gray-100"
-            >
-              Aanmelden
-            </Button>
-          </form>
-        </div>
-      </section>
     </div>
   )
 }

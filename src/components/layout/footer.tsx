@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 
 export function Footer() {
@@ -113,11 +112,14 @@ export function Footer() {
             © 2024 Verde. Alle rechten voorbehouden.
           </p>
           <div className="mt-4 md:mt-0 flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <Image src="/icons/ideal.svg" alt="iDEAL" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/paypal.svg" alt="PayPal" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/visa.svg" alt="Visa" width={24} height={24} className="h-6 w-auto" />
-              <Image src="/icons/mastercard.svg" alt="Mastercard" width={24} height={24} className="h-6 w-auto" />
+            <div className="flex items-center space-x-3">
+              <span className="text-xs text-gray-500">Betaalmethoden:</span>
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">iDEAL</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">PayPal</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Visa</span>
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">Mastercard</span>
+              </div>
             </div>
           </div>
         </div>
