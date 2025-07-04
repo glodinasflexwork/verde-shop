@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Grid, List, Search, SlidersHorizontal } from 'lucide-react';
 
-// Mock product data - will be replaced with real data later
+/// Mock product data - will be replaced with real data later
 const mockProducts = [
   {
     id: 1,
@@ -12,7 +13,7 @@ const mockProducts = [
     price: 29.99,
     originalPrice: null,
     category: 'Tops',
-    image: '/api/placeholder/300/400',
+    image: '/products/organic-cotton-tshirt-white-front.jpg',
     rating: 4.5,
     reviews: 24,
     sustainable: true,
@@ -25,7 +26,7 @@ const mockProducts = [
     price: 89.99,
     originalPrice: 109.99,
     category: 'Bottoms',
-    image: '/api/placeholder/300/400',
+    image: '/products/recycled-denim-jeans-blue-front.jpg',
     rating: 4.8,
     reviews: 42,
     sustainable: true,
@@ -38,7 +39,7 @@ const mockProducts = [
     price: 69.99,
     originalPrice: null,
     category: 'Tops',
-    image: '/api/placeholder/300/400',
+    image: '/products/hemp-hoodie-green-front.jpg',
     rating: 4.6,
     reviews: 18,
     sustainable: true,
@@ -51,7 +52,7 @@ const mockProducts = [
     price: 79.99,
     originalPrice: null,
     category: 'Dresses',
-    image: '/api/placeholder/300/400',
+    image: '/products/bamboo-dress-black-front.jpg',
     rating: 4.7,
     reviews: 31,
     sustainable: true,
@@ -62,13 +63,13 @@ const mockProducts = [
     id: 5,
     name: 'Organic Linen Shirt',
     price: 59.99,
-    originalPrice: 74.99,
+    originalPrice: null,
     category: 'Tops',
-    image: '/api/placeholder/300/400',
+    image: '/products/organic-linen-shirt-white-front.jpg',
     rating: 4.4,
     reviews: 15,
     sustainable: true,
-    colors: ['White', 'Light Blue', 'Sage'],
+    colors: ['White', 'Beige', 'Light Blue'],
     sizes: ['S', 'M', 'L', 'XL']
   },
   {
@@ -77,12 +78,12 @@ const mockProducts = [
     price: 99.99,
     originalPrice: null,
     category: 'Tops',
-    image: '/api/placeholder/300/400',
+    image: '/products/recycled-wool-sweater-charcoal-front.jpg',
     rating: 4.9,
     reviews: 28,
     sustainable: true,
     colors: ['Charcoal', 'Cream', 'Forest Green'],
-    sizes: ['XS', 'S', 'M', 'L', 'XL']
+    sizes: ['S', 'M', 'L', 'XL']
   }
 ];
 
@@ -285,10 +286,12 @@ export default function ProductsPage() {
                       // Grid View
                       <>
                         <div className="aspect-[3/4] bg-gray-100 relative overflow-hidden">
-                          <img
+                          <Image
                             src={product.image}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                           {product.originalPrice && (
                             <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-xs font-medium">
@@ -336,11 +339,13 @@ export default function ProductsPage() {
                     ) : (
                       // List View
                       <div className="flex gap-4 p-4">
-                        <div className="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                          <img
+                        <div className="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
+                          <Image
                             src={product.image}
                             alt={product.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="128px"
                           />
                         </div>
                         <div className="flex-1">

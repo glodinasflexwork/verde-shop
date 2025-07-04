@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Truck, Shield, Recycle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -17,10 +18,10 @@ const mockProducts = {
     description: 'Een zachte en comfortabele t-shirt gemaakt van 100% biologisch katoen. Perfect voor dagelijks gebruik en gemaakt onder eerlijke arbeidsomstandigheden.',
     longDescription: 'Deze premium t-shirt is gemaakt van GOTS-gecertificeerd biologisch katoen dat geteeld is zonder schadelijke pesticiden of kunstmest. Het zachte, ademende materiaal zorgt voor optimaal comfort gedurende de hele dag. De klassieke pasvorm en tijdloze kleuren maken dit shirt een veelzijdige toevoeging aan je garderobe.',
     images: [
-      '/api/placeholder/600/800',
-      '/api/placeholder/600/800',
-      '/api/placeholder/600/800',
-      '/api/placeholder/600/800'
+      '/products/organic-cotton-tshirt-white-front.jpg',
+      '/products/organic-cotton-tshirt-white-back.jpg',
+      '/products/organic-cotton-tshirt-black-front.jpg',
+      '/products/organic-cotton-tshirt-lifestyle.jpg'
     ],
     rating: 4.5,
     reviews: 24,
@@ -67,9 +68,9 @@ const mockProducts = {
     description: 'Stijlvolle jeans gemaakt van gerecyclede denim. Duurzaam, comfortabel en perfect voor elke gelegenheid.',
     longDescription: 'Deze innovatieve jeans zijn gemaakt van 85% gerecyclede denim en 15% biologisch katoen. Door het hergebruik van bestaande denim reduceren we waterverbruik met 70% en CO2-uitstoot met 60%. De moderne slim-fit pasvorm en klassieke five-pocket styling maken deze jeans geschikt voor zowel casual als smart-casual looks.',
     images: [
-      '/api/placeholder/600/800',
-      '/api/placeholder/600/800',
-      '/api/placeholder/600/800'
+      '/products/recycled-denim-jeans-blue-front.jpg',
+      '/products/recycled-denim-jeans-blue-back.jpg',
+      '/products/recycled-denim-jeans-black-front.jpg'
     ],
     rating: 4.8,
     reviews: 42,
@@ -167,11 +168,14 @@ export default function ProductDetailPage() {
           {/* Product Images */}
           <div className="space-y-4">
             {/* Main Image */}
-            <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden">
-              <img
+            <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative">
+              <Image
                 src={product.images[selectedImage]}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
               />
             </div>
 
@@ -181,14 +185,16 @@ export default function ProductDetailPage() {
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
-                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-colors ${
+                  className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 transition-colors relative ${
                     selectedImage === index ? 'border-green-500' : 'border-transparent hover:border-gray-300'
                   }`}
                 >
-                  <img
+                  <Image
                     src={image}
                     alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="120px"
                   />
                 </button>
               ))}
