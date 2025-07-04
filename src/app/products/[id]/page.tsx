@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Truck, Shield, Recycle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart-context';
+import { useToast } from '@/contexts/toast-context';
 
 // Mock product data - will be replaced with real data later
 const mockProducts = {
@@ -115,6 +116,7 @@ export default function ProductDetailPage() {
   const productId = params.id as string;
   const product = mockProducts[productId as keyof typeof mockProducts];
   const { addItem } = useCart();
+  const { success, error } = useToast();
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedColor, setSelectedColor] = useState(0);
@@ -145,7 +147,7 @@ export default function ProductDetailPage() {
   };
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert('Selecteer eerst een maat');
+      error('Selecteer eerst een maat', 'Kies een maat voordat je het product aan je winkelwagen toevoegt.');
       return;
     }
 
@@ -166,8 +168,11 @@ export default function ProductDetailPage() {
       size: selectedSizeName,
     });
 
-    // Show success message (you could replace this with a toast notification)
-    alert(`${product.name} (${selectedColorName}, ${selectedSizeName}) toegevoegd aan winkelwagen!`);
+    // Show professional success notification
+    success(
+      'Toegevoegd aan winkelwagen!', 
+      `${product.name} (${selectedColorName}, ${selectedSizeName}) is toegevoegd aan je winkelwagen.`
+    );
   };
 
   return (
