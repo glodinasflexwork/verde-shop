@@ -23,7 +23,7 @@ interface CustomerDetails {
 export default function CheckoutPage() {
   const { state } = useCart();
   const router = useRouter();
-  const { success, error } = useToast();
+  const { error } = useToast();
   
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails>({
     email: '',
@@ -88,17 +88,39 @@ export default function CheckoutPage() {
     setIsProcessing(true);
     
     try {
-      // This will be implemented in Phase 3 with Stripe integration
-      console.log('Processing payment with:', { customerDetails, cart: state });
+      // Create Stripe checkout session
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          items: state.items,
+          customerDetails,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
+      }
+
+      const { sessionId } = await response.json();
+
+      // Redirect to Stripe Checkout
+      const { getStripe } = await import('@/lib/stripe');
+      const stripeInstance = await getStripe();
       
-      // Simulate processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // For now, show success message
-      success(
-        'Bestelling geplaatst!', 
-        'Je bestelling is succesvol verwerkt. Je ontvangt binnenkort een bevestigingsmail.'
-      );
+      if (!stripeInstance) {
+        throw new Error('Failed to load Stripe');
+      }
+
+      const { error } = await stripeInstance.redirectToCheckout({
+        sessionId,
+      });
+
+      if (error) {
+        throw error;
+      }
       
     } catch (err) {
       console.error('Payment error:', err);
@@ -122,7 +144,7 @@ export default function CheckoutPage() {
         <div className="mb-8">
           <Link 
             href="/cart" 
-            className="inline-flex items-center text-green-600 hover:text-green-700 mb-4"
+            className="inline-flex items-center text-amber-600 hover:text-amber-700 mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Terug naar winkelwagen
@@ -147,7 +169,7 @@ export default function CheckoutPage() {
                     type="email"
                     value={customerDetails.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                       errors.email ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="je@email.com"
@@ -164,7 +186,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={customerDetails.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                         errors.firstName ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Jan"
@@ -180,7 +202,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={customerDetails.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                         errors.lastName ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="de Vries"
@@ -197,7 +219,7 @@ export default function CheckoutPage() {
                     type="tel"
                     value={customerDetails.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                       errors.phone ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="06 12345678"
@@ -220,7 +242,7 @@ export default function CheckoutPage() {
                     type="text"
                     value={customerDetails.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                       errors.address ? 'border-red-500' : 'border-gray-300'
                     }`}
                     placeholder="Straatnaam 123"
@@ -237,7 +259,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={customerDetails.postalCode}
                       onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                         errors.postalCode ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="1234 AB"
@@ -253,7 +275,7 @@ export default function CheckoutPage() {
                       type="text"
                       value={customerDetails.city}
                       onChange={(e) => handleInputChange('city', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 ${
+                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
                         errors.city ? 'border-red-500' : 'border-gray-300'
                       }`}
                       placeholder="Amsterdam"
@@ -269,7 +291,7 @@ export default function CheckoutPage() {
                   <select
                     value={customerDetails.country}
                     onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                   >
                     <option value="Nederland">Nederland</option>
                     <option value="België">België</option>
@@ -376,7 +398,7 @@ export default function CheckoutPage() {
                 <Button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full bg-green-600 hover:bg-green-700 text-lg py-3"
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-lg py-3"
                 >
                   {isProcessing ? (
                     <div className="flex items-center gap-2">
