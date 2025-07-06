@@ -54,29 +54,29 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-green-50 to-green-100 py-20">
+      <section className="relative bg-gradient-to-r from-amber-50 to-amber-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                 Duurzame Mode &{' '}
-                <span className="text-green-600">Schoonheid</span>
+                <span className="text-amber-600">Schoonheid</span>
               </h1>
               <p className="text-xl text-gray-600 mb-8">
                 Ontdek onze collectie van ethisch geproduceerde mode en natuurlijke 
-                schoonheidsproducten. Voor een betere wereld, stap voor stap.
+                schoonheidsproducten bij Flint & Glow. Voor een betere wereld, stap voor stap.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild>
-                  <Link href="/fashion">Ontdek Onze Collectie</Link>
+                <Button size="lg" asChild className="bg-amber-600 hover:bg-amber-700">
+                  <Link href="/products">Ontdek Onze Collectie</Link>
                 </Button>
-                <Button variant="outline" size="lg" asChild>
+                <Button variant="outline" size="lg" asChild className="border-amber-600 text-amber-600 hover:bg-amber-50">
                   <Link href="/about">Ons Verhaal</Link>
                 </Button>
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-square bg-green-200 rounded-2xl overflow-hidden">
+              <div className="aspect-square bg-amber-200 rounded-2xl overflow-hidden">
                 <Image
                   src="/images/hero-sustainable-fashion.jpg"
                   alt="Duurzame mode collectie"
@@ -97,8 +97,8 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {trustIndicators.map((indicator, index) => (
               <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                  <indicator.icon className="w-8 h-8 text-green-600" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
+                  <indicator.icon className="w-8 h-8 text-amber-600" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {indicator.title}

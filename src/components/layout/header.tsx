@@ -28,8 +28,12 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link href="/" className="text-2xl font-bold text-green-800">
-              VERDE
+            <Link href="/" className="flex items-center">
+              <img 
+                src="/flint-glow-horizontal-header.png" 
+                alt="Flint & Glow" 
+                className="h-8 w-auto"
+              />
             </Link>
           </div>
 
@@ -39,7 +43,7 @@ export function Header() {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-green-800 px-3 py-2 text-sm font-medium transition-colors"
+                className="text-gray-700 hover:text-amber-600 px-3 py-2 text-sm font-medium transition-colors"
               >
                 {item.name}
               </Link>
@@ -52,7 +56,7 @@ export function Header() {
               <input
                 type="text"
                 placeholder="Zoeken naar producten..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
               <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
@@ -64,7 +68,7 @@ export function Header() {
             <div className="relative">
               {session ? (
                 <div className="flex items-center space-x-2">
-                  <Link href="/account" className="text-gray-700 hover:text-green-800">
+                  <Link href="/account" className="text-gray-700 hover:text-amber-600">
                     <User className="h-6 w-6" />
                   </Link>
                   <Button
@@ -77,25 +81,25 @@ export function Header() {
                   </Button>
                 </div>
               ) : (
-                <Link href="/auth/signin" className="text-gray-700 hover:text-green-800">
+                <Link href="/auth/signin" className="text-gray-700 hover:text-amber-600">
                   <User className="h-6 w-6" />
                 </Link>
               )}
             </div>
 
             {/* Wishlist */}
-            <Link href="/wishlist" className="text-gray-700 hover:text-green-800">
+            <Link href="/wishlist" className="text-gray-700 hover:text-amber-600">
               <Heart className="h-6 w-6" />
             </Link>
 
             {/* Shopping Cart */}
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative text-gray-700 hover:text-green-800 transition-colors"
+              className="relative text-gray-700 hover:text-amber-600 transition-colors"
             >
               <ShoppingCart className="h-6 w-6" />
               {state.itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {state.itemCount}
                 </span>
               )}
@@ -104,7 +108,7 @@ export function Header() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-gray-700 hover:text-green-800"
+              className="md:hidden text-gray-700 hover:text-amber-600"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -120,7 +124,7 @@ export function Header() {
                 <input
                   type="text"
                   placeholder="Zoeken naar producten..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
                 <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               </div>
@@ -130,7 +134,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-gray-700 hover:text-green-800 block px-3 py-2 text-base font-medium"
+                  className="text-gray-700 hover:text-amber-600 block px-3 py-2 text-base font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -143,7 +147,7 @@ export function Header() {
                   <>
                     <Link
                       href="/account"
-                      className="text-gray-700 hover:text-green-800 block px-3 py-2 text-base font-medium"
+                      className="text-gray-700 hover:text-amber-600 block px-3 py-2 text-base font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Mijn Account
@@ -153,7 +157,7 @@ export function Header() {
                         signOut()
                         setIsMenuOpen(false)
                       }}
-                      className="text-gray-700 hover:text-green-800 block px-3 py-2 text-base font-medium w-full text-left"
+                      className="text-gray-700 hover:text-amber-600 block px-3 py-2 text-base font-medium w-full text-left"
                     >
                       Uitloggen
                     </button>
@@ -162,14 +166,14 @@ export function Header() {
                   <>
                     <Link
                       href="/auth/signin"
-                      className="text-gray-700 hover:text-green-800 block px-3 py-2 text-base font-medium"
+                      className="text-gray-700 hover:text-amber-600 block px-3 py-2 text-base font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Inloggen
                     </Link>
                     <Link
                       href="/auth/signup"
-                      className="text-gray-700 hover:text-green-800 block px-3 py-2 text-base font-medium"
+                      className="text-gray-700 hover:text-amber-600 block px-3 py-2 text-base font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Registreren

@@ -10,7 +10,7 @@ export function Footer() {
       { name: 'Maattabel', href: '/maattabel' },
       { name: 'Garantie', href: '/garantie' },
     ],
-    'Over Verde': [
+    'Over Flint & Glow': [
       { name: 'Ons Verhaal', href: '/about' },
       { name: 'Duurzaamheid', href: '/sustainability' },
       { name: 'Certificeringen', href: '/certifications' },
@@ -36,24 +36,28 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
-            <Link href="/" className="text-2xl font-bold text-green-800">
-              VERDE
+            <Link href="/" className="flex items-center">
+              <img 
+                src="/flint-glow-horizontal-header.png" 
+                alt="Flint & Glow" 
+                className="h-6 w-auto"
+              />
             </Link>
             <p className="mt-4 text-sm text-gray-600">
               Duurzame mode en natuurlijke schoonheid voor een betere wereld. 
               Ethisch geproduceerd, milieuvriendelijk en stijlvol.
             </p>
             <div className="mt-6 flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-green-600">
+              <a href="#" className="text-gray-400 hover:text-amber-600">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-green-600">
+              <a href="#" className="text-gray-400 hover:text-amber-600">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-green-600">
+              <a href="#" className="text-gray-400 hover:text-amber-600">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="mailto:hello@verde.nl" className="text-gray-400 hover:text-green-600">
+              <a href="mailto:hello@flintandglow.nl" className="text-gray-400 hover:text-amber-600">
                 <Mail className="h-5 w-5" />
               </a>
             </div>
@@ -70,7 +74,7 @@ export function Footer() {
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-gray-600 hover:text-green-600 transition-colors"
+                      className="text-sm text-gray-600 hover:text-amber-600 transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -94,11 +98,11 @@ export function Footer() {
               <input
                 type="email"
                 placeholder="Uw e-mailadres"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
               <button
                 type="submit"
-                className="px-6 py-2 bg-green-600 text-white rounded-r-lg hover:bg-green-700 transition-colors"
+                className="px-6 py-2 bg-amber-600 text-white rounded-r-lg hover:bg-amber-700 transition-colors"
               >
                 Aanmelden
               </button>
@@ -109,7 +113,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="mt-6 pt-4 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-gray-600">
-            © 2024 Verde. Alle rechten voorbehouden.
+            © 2024 Flint & Glow. Alle rechten voorbehouden.
           </p>
           <div className="mt-4 md:mt-0 flex items-center space-x-6">
             <div className="flex items-center space-x-3">

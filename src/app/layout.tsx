@@ -10,9 +10,9 @@ import { ToastContainer } from '@/components/ui/toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Verde - Duurzame Mode & Schoonheid',
-  description: 'Ontdek onze collectie van duurzame mode en natuurlijke schoonheidsproducten. Ethisch geproduceerd, milieuvriendelijk en stijlvol.',
-  keywords: 'duurzame mode, natuurlijke schoonheid, eco-friendly, biologisch katoen, Nederland',
+  title: 'Flint & Glow - Duurzame Mode & Schoonheid',
+  description: 'Ontdek onze collectie van duurzame mode en natuurlijke schoonheidsproducten bij Flint & Glow. Ethisch geproduceerd, milieuvriendelijk en stijlvol.',
+  keywords: 'duurzame mode, natuurlijke schoonheid, eco-friendly, biologisch katoen, Nederland, Flint & Glow',
 }
 
 export default function RootLayout({
