@@ -1,35 +1,38 @@
 import Stripe from 'stripe'
-import { loadStripe, Stripe as StripeType } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 
+// Server-side Stripe instance
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-06-30.basil',
-  typescript: true,
+  apiVersion: '2024-06-20',
 })
 
-let stripePromise: Promise<StripeType | null> | null = null
+// Client-side Stripe instance
+let stripePromise: Promise<any> | null = null
 
-export const getStripe = () => {
+export const getStripe = async () => {
   if (!stripePromise) {
-    const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    // Try to get the publishable key from environment variables first
+    let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
     
-    // Debug logging
-    console.log('Environment check:', {
-      hasPublishableKey: !!publishableKey,
-      keyLength: publishableKey?.length || 0,
-      keyPrefix: publishableKey?.substring(0, 7) || 'none',
-      allEnvKeys: Object.keys(process.env).filter(key => key.includes('STRIPE'))
-    })
-    
+    // If not available, fetch it from our API endpoint
     if (!publishableKey) {
-      console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set')
-      console.error('Available environment variables:', Object.keys(process.env))
-      throw new Error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set')
+      try {
+        const response = await fetch('/api/stripe-config')
+        const data = await response.json()
+        publishableKey = data.publishableKey
+      } catch (error) {
+        console.error('Failed to fetch Stripe config:', error)
+        throw new Error('Unable to initialize Stripe')
+      }
     }
     
-    console.log('Initializing Stripe with key:', publishableKey.substring(0, 20) + '...')
+    if (!publishableKey) {
+      throw new Error('Stripe publishable key not found')
+    }
+    
+    console.log('🔧 Stripe Debug: Initializing with publishable key')
     stripePromise = loadStripe(publishableKey)
   }
-  
   return stripePromise
 }
 
