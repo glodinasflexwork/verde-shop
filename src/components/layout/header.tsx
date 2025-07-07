@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { ShoppingCart, Search, User, Menu, X, Heart } from 'lucide-react'
@@ -29,9 +30,12 @@ export function Header() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <img 
-                src="/flint-glow-header-prominent.png" 
-                alt="Flint & Glow" 
+              <Image
+                src="/flint-glow-header-prominent.png"
+                alt="Flint & Glow"
+                width={200}
+                height={60}
+                priority
                 className="h-16 w-auto"
               />
             </Link>

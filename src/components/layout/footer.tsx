@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 
 export function Footer() {
@@ -37,9 +38,11 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center">
-              <img 
+              <Image 
                 src="/flint-glow-horizontal-header.png" 
                 alt="Flint & Glow" 
+                width={150}
+                height={24}
                 className="h-6 w-auto"
               />
             </Link>
