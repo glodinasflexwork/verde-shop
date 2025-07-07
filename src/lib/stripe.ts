@@ -1,38 +1,42 @@
 import Stripe from 'stripe'
-import { loadStripe } from '@stripe/stripe-js'
+import { loadStripe, Stripe as StripeType } from '@stripe/stripe-js'
 
 // Server-side Stripe instance
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: '2025-06-30.basil',
 })
 
 // Client-side Stripe instance
-let stripePromise: Promise<any> | null = null
+let stripePromise: Promise<StripeType | null> | null = null
 
-export const getStripe = async () => {
+export const getStripe = async (): Promise<StripeType | null> => {
   if (!stripePromise) {
-    // Try to get the publishable key from environment variables first
-    let publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-    
-    // If not available, fetch it from our API endpoint
-    if (!publishableKey) {
-      try {
-        const response = await fetch('/api/stripe-config')
-        const data = await response.json()
-        publishableKey = data.publishableKey
-      } catch (error) {
-        console.error('Failed to fetch Stripe config:', error)
-        throw new Error('Unable to initialize Stripe')
+    try {
+      console.log('🔧 Fetching Stripe publishable key from API...')
+      
+      // Fetch the publishable key from our secure API endpoint
+      const response = await fetch('/api/stripe-config')
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Stripe config: ${response.status}`)
       }
+      
+      const data = await response.json()
+      const publishableKey = data.publishableKey
+      
+      if (!publishableKey) {
+        throw new Error('Stripe publishable key not found in API response')
+      }
+      
+      console.log('✅ Stripe publishable key retrieved successfully')
+      stripePromise = loadStripe(publishableKey)
+      
+    } catch (error) {
+      console.error('❌ Failed to initialize Stripe:', error)
+      throw new Error('Unable to initialize Stripe payment system')
     }
-    
-    if (!publishableKey) {
-      throw new Error('Stripe publishable key not found')
-    }
-    
-    console.log('🔧 Stripe Debug: Initializing with publishable key')
-    stripePromise = loadStripe(publishableKey)
   }
+  
   return stripePromise
 }
 

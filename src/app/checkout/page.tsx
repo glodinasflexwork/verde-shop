@@ -48,31 +48,18 @@ export default function CheckoutPage() {
 
   const shippingCost = state.total >= 50 ? 0 : 4.95;
   const tax = state.total * 0.21; // 21% BTW for Netherlands
-  const totalWithTaxAndShipping = state.total + shippingCost + tax;
-
-  const handleInputChange = (field: keyof CustomerDetails, value: string) => {
-    setCustomerDetails(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
-    }
-  };
+  const finalTotal = state.total + shippingCost + tax;
 
   const validateForm = (): boolean => {
     const newErrors: Partial<CustomerDetails> = {};
 
     if (!customerDetails.email) newErrors.email = 'E-mailadres is verplicht';
-    else if (!/\S+@\S+\.\S+/.test(customerDetails.email)) newErrors.email = 'Ongeldig e-mailadres';
-    
     if (!customerDetails.firstName) newErrors.firstName = 'Voornaam is verplicht';
     if (!customerDetails.lastName) newErrors.lastName = 'Achternaam is verplicht';
     if (!customerDetails.phone) newErrors.phone = 'Telefoonnummer is verplicht';
     if (!customerDetails.address) newErrors.address = 'Adres is verplicht';
     if (!customerDetails.city) newErrors.city = 'Stad is verplicht';
     if (!customerDetails.postalCode) newErrors.postalCode = 'Postcode is verplicht';
-    else if (!/^\d{4}\s?[A-Z]{2}$/i.test(customerDetails.postalCode)) {
-      newErrors.postalCode = 'Ongeldige postcode (bijv. 1234 AB)';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -82,13 +69,17 @@ export default function CheckoutPage() {
     e.preventDefault();
     
     if (!validateForm()) {
+      error('Formulierfout', 'Vul alle verplichte velden in');
       return;
     }
 
     setIsProcessing(true);
-    
+
     try {
-      // Create Stripe checkout session
+      console.log('Starting checkout process...');
+      console.log('Cart items:', state.items);
+      console.log('Customer details:', customerDetails);
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -100,13 +91,24 @@ export default function CheckoutPage() {
         }),
       });
 
+      console.log('Checkout response status:', response.status);
+
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json();
+        console.error('Checkout error response:', errorData);
+        throw new Error(errorData.details || 'Failed to create checkout session');
       }
 
-      const { sessionId } = await response.json();
+      const { sessionId, url } = await response.json();
+      console.log('Checkout session created:', { sessionId, url });
 
-      // Redirect to Stripe Checkout
+      if (url) {
+        // Direct redirect to Stripe Checkout URL
+        window.location.href = url;
+        return;
+      }
+
+      // Fallback: Use Stripe.js redirect
       const { getStripe } = await import('@/lib/stripe');
       const stripeInstance = await getStripe();
       
@@ -114,22 +116,32 @@ export default function CheckoutPage() {
         throw new Error('Failed to load Stripe');
       }
 
-      const { error } = await stripeInstance.redirectToCheckout({
+      console.log('Redirecting to Stripe checkout...');
+      const { error: stripeError } = await stripeInstance.redirectToCheckout({
         sessionId,
       });
 
-      if (error) {
-        throw error;
+      if (stripeError) {
+        console.error('Stripe redirect error:', stripeError);
+        throw stripeError;
       }
       
     } catch (err) {
       console.error('Payment error:', err);
       error(
         'Betalingsfout', 
-        'Er is een fout opgetreden bij het verwerken van de betaling. Probeer het opnieuw.'
+        err instanceof Error ? err.message : 'Er is een fout opgetreden bij het verwerken van de betaling. Probeer het opnieuw.'
       );
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const handleInputChange = (field: keyof CustomerDetails, value: string) => {
+    setCustomerDetails(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -153,282 +165,258 @@ export default function CheckoutPage() {
           <p className="text-gray-600 mt-2">Vul je gegevens in om je bestelling te voltooien</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Customer Details Form */}
-          <div className="space-y-8">
-            {/* Contact Information */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Contactgegevens</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    E-mailadres *
-                  </label>
-                  <input
-                    type="email"
-                    value={customerDetails.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="je@email.com"
-                  />
-                  {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Checkout Form */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Contact Information */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Contactgegevens</h2>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Voornaam *
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      E-mailadres *
                     </label>
                     <input
-                      type="text"
-                      value={customerDetails.firstName}
-                      onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                        errors.firstName ? 'border-red-500' : 'border-gray-300'
+                      type="email"
+                      id="email"
+                      value={customerDetails.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                        errors.email ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="Jan"
+                      placeholder="je@email.com"
                     />
-                    {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                        Voornaam *
+                      </label>
+                      <input
+                        type="text"
+                        id="firstName"
+                        value={customerDetails.firstName}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                          errors.firstName ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="Jan"
+                      />
+                      {errors.firstName && <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                        Achternaam *
+                      </label>
+                      <input
+                        type="text"
+                        id="lastName"
+                        value={customerDetails.lastName}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                          errors.lastName ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="de Vries"
+                      />
+                      {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Achternaam *
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                      Telefoonnummer *
                     </label>
                     <input
-                      type="text"
-                      value={customerDetails.lastName}
-                      onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                        errors.lastName ? 'border-red-500' : 'border-gray-300'
+                      type="tel"
+                      id="phone"
+                      value={customerDetails.phone}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                        errors.phone ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="de Vries"
+                      placeholder="06 12345678"
                     />
-                    {errors.lastName && <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>}
+                    {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Telefoonnummer *
-                  </label>
-                  <input
-                    type="tel"
-                    value={customerDetails.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                      errors.phone ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="06 12345678"
-                  />
-                  {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                 </div>
               </div>
-            </div>
 
-            {/* Shipping Address */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Verzendadres</h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Adres *
-                  </label>
-                  <input
-                    type="text"
-                    value={customerDetails.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                      errors.address ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Straatnaam 123"
-                  />
-                  {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              {/* Shipping Address */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Verzendadres</h2>
+                <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Postcode *
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
+                      Adres *
                     </label>
                     <input
                       type="text"
-                      value={customerDetails.postalCode}
-                      onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                        errors.postalCode ? 'border-red-500' : 'border-gray-300'
+                      id="address"
+                      value={customerDetails.address}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                        errors.address ? 'border-red-500' : 'border-gray-300'
                       }`}
-                      placeholder="1234 AB"
+                      placeholder="Straatnaam 123"
                     />
-                    {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>}
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+                        Postcode *
+                      </label>
+                      <input
+                        type="text"
+                        id="postalCode"
+                        value={customerDetails.postalCode}
+                        onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                          errors.postalCode ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="1234 AB"
+                      />
+                      {errors.postalCode && <p className="text-red-500 text-sm mt-1">{errors.postalCode}</p>}
+                    </div>
+
+                    <div>
+                      <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                        Stad *
+                      </label>
+                      <input
+                        type="text"
+                        id="city"
+                        value={customerDetails.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 ${
+                          errors.city ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        placeholder="Amsterdam"
+                      />
+                      {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Stad *
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+                      Land *
                     </label>
-                    <input
-                      type="text"
-                      value={customerDetails.city}
-                      onChange={(e) => handleInputChange('city', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 ${
-                        errors.city ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Amsterdam"
-                    />
-                    {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                    <select
+                      id="country"
+                      value={customerDetails.country}
+                      onChange={(e) => handleInputChange('country', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="Nederland">Nederland</option>
+                      <option value="België">België</option>
+                      <option value="Duitsland">Duitsland</option>
+                    </select>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Land *
-                  </label>
-                  <select
-                    value={customerDetails.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                  >
-                    <option value="Nederland">Nederland</option>
-                    <option value="België">België</option>
-                    <option value="Duitsland">Duitsland</option>
-                  </select>
                 </div>
               </div>
-            </div>
 
-            {/* Payment Method (Placeholder for Phase 3) */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Betaalmethode</h2>
-              
-              <div className="space-y-4">
-                <div className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center gap-3">
-                    <CreditCard className="w-5 h-5 text-blue-600" />
-                    <span className="font-medium">iDEAL, Creditcard & meer</span>
+              {/* Payment Method */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Betaalmethode</h2>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <CreditCard className="w-5 h-5 text-gray-600" />
+                    <span className="text-sm text-gray-700">iDEAL, Creditcard & meer</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-2">
                     Veilig betalen met iDEAL, Visa, Mastercard en andere betaalmethoden
                   </p>
-                </div>
-                
-                <div className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg">
-                  💳 Betaalformulier wordt geladen in de volgende stap
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Bestelsamenvatting
-              </h2>
-
-              {/* Order Items */}
-              <div className="space-y-4 mb-6">
-                {state.items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="w-16 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-gray-900 text-sm">
-                        {item.name}
-                      </h3>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {item.color && `Kleur: ${item.color}`}
-                        {item.color && item.size && ' • '}
-                        {item.size && `Maat: ${item.size}`}
-                      </div>
-                      <div className="flex justify-between items-center mt-2">
-                        <span className="text-sm text-gray-600">Aantal: {item.quantity}</span>
-                        <span className="font-medium text-sm">€{(item.price * item.quantity).toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Order Totals */}
-              <div className="space-y-3 border-t pt-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Subtotaal</span>
-                  <span>€{state.total.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Verzendkosten</span>
-                  <span>
-                    {shippingCost === 0 ? (
-                      <span className="text-green-600">Gratis</span>
-                    ) : (
-                      `€${shippingCost.toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">BTW (21%)</span>
-                  <span>€{tax.toFixed(2)}</span>
-                </div>
-
-                <div className="border-t pt-3">
-                  <div className="flex justify-between text-lg font-semibold">
-                    <span>Totaal</span>
-                    <span>€{totalWithTaxAndShipping.toFixed(2)}</span>
-                  </div>
                 </div>
               </div>
 
               {/* Submit Button */}
-              <form onSubmit={handleSubmit} className="mt-6">
-                <Button
-                  type="submit"
-                  disabled={isProcessing}
-                  className="w-full bg-amber-600 hover:bg-amber-700 text-lg py-3"
-                >
-                  {isProcessing ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Verwerken...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-5 h-5" />
-                      Bestelling plaatsen - €{totalWithTaxAndShipping.toFixed(2)}
-                    </div>
-                  )}
-                </Button>
-              </form>
+              <Button
+                type="submit"
+                disabled={isProcessing}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 text-lg font-semibold"
+              >
+                <Lock className="w-5 h-5 mr-2" />
+                {isProcessing ? 'Verwerken...' : `Bestelling plaatsen - €${finalTotal.toFixed(2)}`}
+              </Button>
 
-              {/* Security & Trust */}
-              <div className="mt-6 pt-6 border-t">
-                <div className="grid grid-cols-3 gap-4 text-center text-xs text-gray-500">
-                  <div>
-                    <Lock className="w-4 h-4 mx-auto mb-1" />
-                    <span>Veilig betalen</span>
+              <div className="text-xs text-gray-500 text-center">
+                🔒 Betaalformulier wordt geladen in de volgende stap
+              </div>
+            </form>
+          </div>
+
+          {/* Order Summary */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Bestelsamenvatting</h2>
+            
+            {/* Items */}
+            <div className="space-y-4 mb-6">
+              {state.items.map((item) => (
+                <div key={`${item.id}-${item.color}-${item.size}`} className="flex items-center space-x-4">
+                  <div className="relative w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <div>
-                    <Truck className="w-4 h-4 mx-auto mb-1" />
-                    <span>Gratis retour</span>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900">{item.name}</h3>
+                    {item.color && <p className="text-sm text-gray-600">Kleur: {item.color}</p>}
+                    {item.size && <p className="text-sm text-gray-600">Maat: {item.size}</p>}
+                    <p className="text-sm text-gray-600">Aantal: {item.quantity}</p>
                   </div>
-                  <div>
-                    <Shield className="w-4 h-4 mx-auto mb-1" />
-                    <span>2 jaar garantie</span>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">€{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Totals */}
+            <div className="border-t pt-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotaal</span>
+                <span className="text-gray-900">€{state.total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Verzendkosten</span>
+                <span className="text-gray-900">
+                  {shippingCost === 0 ? 'Gratis' : `€${shippingCost.toFixed(2)}`}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">BTW (21%)</span>
+                <span className="text-gray-900">€{tax.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="flex justify-between text-lg font-semibold">
+                  <span className="text-gray-900">Totaal</span>
+                  <span className="text-gray-900">€{finalTotal.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="mt-6 pt-6 border-t">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="flex flex-col items-center">
+                  <Lock className="w-6 h-6 text-green-600 mb-2" />
+                  <span className="text-xs text-gray-600">Veilig betalen</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Truck className="w-6 h-6 text-green-600 mb-2" />
+                  <span className="text-xs text-gray-600">Gratis retour binnen 30 dagen</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Shield className="w-6 h-6 text-green-600 mb-2" />
+                  <span className="text-xs text-gray-600">2 jaar garantie</span>
                 </div>
               </div>
             </div>

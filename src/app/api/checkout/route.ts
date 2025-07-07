@@ -9,6 +9,7 @@ interface CartItem {
   image: string
   color?: string
   size?: string
+  stripePriceId?: string
 }
 
 interface CustomerDetails {
@@ -22,10 +23,21 @@ interface CustomerDetails {
   country: string
 }
 
+// Map product names to Stripe price IDs
+const PRODUCT_PRICE_MAP: Record<string, string> = {
+  'Organic Cotton T-Shirt': 'price_1RiIiYKopO2jXhaHtKF7YthX',
+  'Sustainable Jeans': 'price_1RiIiZKopO2jXhaHhgrYMpLO',
+  'Natural Face Cream': 'price_1RiIiZKopO2jXhaHorWSCJrk',
+  'Eco-Friendly Tote Bag': 'price_1RiIiZKopO2jXhaH3BaqoKHF',
+  'Bamboo Toothbrush Set': 'price_1RiIiaKopO2jXhaHFmWL8XSG'
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { items, customerDetails }: { items: CartItem[], customerDetails: CustomerDetails } = body
+
+    console.log('Checkout request received:', { items, customerDetails })
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -41,51 +53,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Calculate totals
-    const subtotal = items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0)
-    const shippingCost = subtotal >= 50 ? 0 : 4.95
-    const tax = subtotal * 0.21 // 21% BTW for Netherlands
+    // Create line items using Stripe price IDs
+    const lineItems = items.map((item: CartItem) => {
+      const stripePriceId = item.stripePriceId || PRODUCT_PRICE_MAP[item.name]
+      
+      if (!stripePriceId) {
+        console.error(`No Stripe price ID found for product: ${item.name}`)
+        throw new Error(`Product ${item.name} not found in Stripe`)
+      }
 
-    // Create line items for Stripe - simplified approach
-    const lineItems = items.map((item: CartItem) => ({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: item.name,
-          description: `${item.color ? `Kleur: ${item.color}` : ''}${item.color && item.size ? ' • ' : ''}${item.size ? `Maat: ${item.size}` : ''}`.trim() || 'Product',
-        },
-        unit_amount: Math.round(item.price * 100), // Convert to cents
-      },
-      quantity: item.quantity,
-    }))
-
-    // Add shipping as a line item if applicable
-    if (shippingCost > 0) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: 'Verzendkosten',
-            description: 'Standaard verzending naar Nederland',
-          },
-          unit_amount: Math.round(shippingCost * 100),
-        },
-        quantity: 1,
-      })
-    }
-
-    // Add tax as a line item
-    lineItems.push({
-      price_data: {
-        currency: 'eur',
-        product_data: {
-          name: 'BTW (21%)',
-          description: 'Nederlandse belasting over toegevoegde waarde',
-        },
-        unit_amount: Math.round(tax * 100),
-      },
-      quantity: 1,
+      return {
+        price: stripePriceId,
+        quantity: item.quantity,
+      }
     })
+
+    console.log('Line items created:', lineItems)
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -109,13 +92,66 @@ export async function POST(request: NextRequest) {
         customerCountry: customerDetails.country,
       },
       locale: 'nl',
+      automatic_tax: {
+        enabled: true,
+      },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: 0,
+              currency: 'eur',
+            },
+            display_name: 'Gratis verzending',
+            delivery_estimate: {
+              minimum: {
+                unit: 'business_day',
+                value: 2,
+              },
+              maximum: {
+                unit: 'business_day',
+                value: 5,
+              },
+            },
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: {
+              amount: 495, // €4.95
+              currency: 'eur',
+            },
+            display_name: 'Standaard verzending',
+            delivery_estimate: {
+              minimum: {
+                unit: 'business_day',
+                value: 1,
+              },
+              maximum: {
+                unit: 'business_day',
+                value: 3,
+              },
+            },
+          },
+        },
+      ],
     })
 
-    return NextResponse.json({ sessionId: session.id })
+    console.log('Stripe session created:', session.id)
+
+    return NextResponse.json({ 
+      sessionId: session.id,
+      url: session.url 
+    })
   } catch (error) {
     console.error('Stripe checkout error:', error)
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Internal server error', 
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      },
       { status: 500 }
     )
   }
