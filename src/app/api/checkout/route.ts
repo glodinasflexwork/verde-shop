@@ -92,9 +92,6 @@ export async function POST(request: NextRequest) {
         customerCountry: customerDetails.country,
       },
       locale: 'nl',
-      automatic_tax: {
-        enabled: true,
-      },
       shipping_options: [
         {
           shipping_rate_data: {
@@ -114,6 +111,7 @@ export async function POST(request: NextRequest) {
                 value: 5,
               },
             },
+            tax_behavior: 'exclusive',
           },
         },
         {
@@ -134,6 +132,7 @@ export async function POST(request: NextRequest) {
                 value: 3,
               },
             },
+            tax_behavior: 'exclusive',
           },
         },
       ],
