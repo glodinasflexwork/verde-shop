@@ -23,9 +23,15 @@ interface CustomerDetails {
   country: string
 }
 
-// Map product names to Stripe price IDs
+// Map product names to Stripe price IDs - Updated to match actual product names
 const PRODUCT_PRICE_MAP: Record<string, string> = {
   'Organic Cotton T-Shirt': 'price_1RiIiYKopO2jXhaHtKF7YthX',
+  'Recycled Denim Jeans': 'price_1RiIiZKopO2jXhaHhgrYMpLO',
+  'Hemp Blend Hoodie': 'price_1RiIiZKopO2jXhaHorWSCJrk',
+  'Bamboo Fiber Dress': 'price_1RiIiZKopO2jXhaH3BaqoKHF',
+  'Organic Linen Shirt': 'price_1RiIiaKopO2jXhaHFmWL8XSG',
+  'Recycled Wool Sweater': 'price_1RiIiaKopO2jXhaHFmWL8XSG',
+  // Legacy mappings for backward compatibility
   'Sustainable Jeans': 'price_1RiIiZKopO2jXhaHhgrYMpLO',
   'Natural Face Cream': 'price_1RiIiZKopO2jXhaHorWSCJrk',
   'Eco-Friendly Tote Bag': 'price_1RiIiZKopO2jXhaH3BaqoKHF',
@@ -59,8 +65,11 @@ export async function POST(request: NextRequest) {
       
       if (!stripePriceId) {
         console.error(`No Stripe price ID found for product: ${item.name}`)
-        throw new Error(`Product ${item.name} not found in Stripe`)
+        console.log('Available products:', Object.keys(PRODUCT_PRICE_MAP))
+        throw new Error(`Product "${item.name}" not found in Stripe`)
       }
+
+      console.log(`Mapping product "${item.name}" to price ID: ${stripePriceId}`)
 
       return {
         price: stripePriceId,
