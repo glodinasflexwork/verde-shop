@@ -46,14 +46,13 @@ export async function POST(request: NextRequest) {
     const shippingCost = subtotal >= 50 ? 0 : 4.95
     const tax = subtotal * 0.21 // 21% BTW for Netherlands
 
-    // Create line items for Stripe
+    // Create line items for Stripe - simplified approach
     const lineItems = items.map((item: CartItem) => ({
       price_data: {
-        currency: 'eur' as const,
+        currency: 'eur',
         product_data: {
           name: item.name,
-          description: `${item.color ? `Kleur: ${item.color}` : ''}${item.color && item.size ? ' • ' : ''}${item.size ? `Maat: ${item.size}` : ''}`.trim(),
-          images: [item.image],
+          description: `${item.color ? `Kleur: ${item.color}` : ''}${item.color && item.size ? ' • ' : ''}${item.size ? `Maat: ${item.size}` : ''}`.trim() || 'Product',
         },
         unit_amount: Math.round(item.price * 100), // Convert to cents
       },
@@ -64,11 +63,10 @@ export async function POST(request: NextRequest) {
     if (shippingCost > 0) {
       lineItems.push({
         price_data: {
-          currency: 'eur' as const,
+          currency: 'eur',
           product_data: {
             name: 'Verzendkosten',
             description: 'Standaard verzending naar Nederland',
-            images: [],
           },
           unit_amount: Math.round(shippingCost * 100),
         },
@@ -79,11 +77,10 @@ export async function POST(request: NextRequest) {
     // Add tax as a line item
     lineItems.push({
       price_data: {
-        currency: 'eur' as const,
+        currency: 'eur',
         product_data: {
           name: 'BTW (21%)',
           description: 'Nederlandse belasting over toegevoegde waarde',
-          images: [],
         },
         unit_amount: Math.round(tax * 100),
       },
@@ -112,14 +109,13 @@ export async function POST(request: NextRequest) {
         customerCountry: customerDetails.country,
       },
       locale: 'nl',
-      currency: 'eur',
     })
 
     return NextResponse.json({ sessionId: session.id })
   } catch (error) {
     console.error('Stripe checkout error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
